@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>HORIZON: GI | WEB MENU</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap">
+<style>
+/* =====================================================================
+   TOKENS — cores, tipografia e medidas. É aqui que se muda o "tema".
+   ===================================================================== */
+:root{
+  --void:#050507;         /* fundo por trás da janela */
+  --bg:#0d0e16;           /* fundo da janela */
+  --panel:#12131d;        /* fundo dos cards */
+  --panel-2:#171826;      /* fundo das opções */
+  --panel-3:#1b1c2d;      /* fundo do conteúdo expandido / hover */
+  --field:#1b1d2e;        /* caixas de valor / input */
+  --line:rgba(255,255,255,.07);
+  --line-2:rgba(255,255,255,.14);
+  --text:#eef0f6;
+  --muted:#888ba1;
+  --accent:#d3ad6a;       /* cor de destaque (trocável no pop de Settings) */
+  --warn:#e2894a;--danger:#e0525f;         /* cor da tag "Risky" */
+  --font-display:'Sora',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+button{font:inherit;background:none;border:0;color:inherit;cursor:pointer}
+:focus-visible{outline:none}
+
+body{
+  height:100vh;display:grid;place-items:center;overflow:hidden;position:relative;
+  font-family:var(--font-body);color:var(--text);background:var(--void);
+}
+/* fundo discreto: leve brilho quente atrás da janela + textura fina */
+body::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 45% at 50% 30%, color-mix(in srgb,var(--accent) 10%,transparent), transparent 70%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(90,100,160,.12), transparent 70%);
+}
+body::after{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ===== JANELA ===== */
+.win{
+  position:relative;width:min(970px,96vw);height:min(624px,94vh);
+  background:var(--bg);border-radius:14px;border:1px solid var(--line);
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.3);overflow:hidden;
+  display:grid;grid-template-rows:66px minmax(0,1fr);
+  animation:winIn .5s cubic-bezier(.2,.9,.3,1) both;
+}
+.win::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;z-index:2;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);
+}
+.noanim,.noanim *{animation:none!important;transition:none!important}
+
+/* ===== HEADER ===== */
+header{display:flex;align-items:center;gap:18px;padding:0 20px 0 26px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px}
+.gem{flex:none;filter:drop-shadow(0 0 8px color-mix(in srgb,var(--accent) 45%,transparent))}
+.gem-fill{fill:var(--accent);transition:fill .3s}
+.gem-line{fill:none;stroke:rgba(5,6,10,.35);stroke-width:.6}
+.brandtext{display:flex;align-items:baseline;gap:8px}
+.wordmark{font-family:var(--font-display);font-weight:800;font-size:16.5px;letter-spacing:.2px;color:#e4e6f1}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:.4px;color:var(--accent);background:color-mix(in srgb,var(--accent) 16%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent);border-radius:4px;padding:2px 6px}
+.status{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12.5px;font-weight:500;padding-left:16px;border-left:1px solid var(--line)}
+.status .dot{width:6px;height:6px;border-radius:50%;background:#5fd394;box-shadow:0 0 0 3px rgba(95,211,148,.18);animation:pulse 2.2s ease-in-out infinite}
+.spacer{flex:1}
+/* sub-páginas (abas do topo): só aparecem quando a categoria tem mais de uma */
+.subtabs{display:flex;align-items:center;gap:6px;padding-left:16px;border-left:1px solid var(--line)}
+.subtabs:empty{display:none}
+.sub{height:36px;padding:0 16px;border-radius:9px;font-weight:700;font-size:13.5px;color:var(--muted);animation:subIn .35s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i)*40ms);transition:color .2s,background .25s}
+.sub:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.sub.active{color:var(--accent);background:var(--panel-2)}
+.hright{display:flex;align-items:center;gap:4px}
+.hbtn{width:34px;height:34px;border-radius:8px;color:var(--muted);font-size:16px;transition:.2s}
+.hbtn:hover{color:var(--text);background:var(--panel-3)}
+.hbtn i{transition:transform .4s}
+#gear:hover i{transform:rotate(70deg)}
+#sbtn:hover i{transform:scale(1.15) rotate(-8deg)}
+
+/* ===== MENU LATERAL ===== */
+main{display:grid;grid-template-columns:186px minmax(0,1fr);min-height:0}
+aside{padding:12px 10px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.tab{
+  position:relative;height:42px;display:flex;align-items:center;gap:13px;padding:0 16px 0 20px;border-radius:7px;
+  color:var(--muted);font-weight:600;font-size:14px;text-align:left;transition:color .2s,background .2s;
+}
+.tab::before{
+  content:'';position:absolute;left:2px;top:50%;transform:translateY(-50%);width:3px;height:0;border-radius:3px;
+  background:var(--accent);transition:height .25s ease;
+}
+.tab i{width:18px;text-align:center;font-size:15px;transition:color .2s}
+.tab:hover{background:var(--panel-3);color:#c3c6dc}
+.tab.active{color:var(--text);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.tab.active i{color:var(--accent)}
+.tab.active::before{height:18px}
+
+/* ===== CONTEÚDO ===== */
+.content{overflow-y:auto;padding:14px 10px 14px 14px}
+.content::-webkit-scrollbar{width:8px}
+.content::-webkit-scrollbar-track{background:transparent}
+.content::-webkit-scrollbar-thumb{background:#282a3d;border-radius:8px}
+.content::-webkit-scrollbar-thumb:hover{background:#34364e}
+.content{scrollbar-width:thin;scrollbar-color:#282a3d transparent}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start;animation:pageIn .3s ease both}
+.col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.card h3{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-size:13.5px;font-weight:700;letter-spacing:.2px;color:var(--text);margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.card h3 .ic{width:24px;height:24px;flex:none;display:grid;place-items:center;border-radius:6px;background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-size:12.5px}
+.items{display:flex;flex-direction:column;gap:8px}
+
+/* ===== OPÇÃO (item) ===== */
+.item{position:relative;background:var(--panel-2);border:1px solid var(--line);border-radius:8px;overflow:hidden;transition:border-color .3s}
+.item:hover{border-color:var(--line-2)}
+/* barra de destaque: cresce do centro quando o módulo está ativo */
+.item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;z-index:2;background:var(--accent);box-shadow:0 0 10px var(--accent);transform:scaleY(0);opacity:0;transition:transform .4s cubic-bezier(.22,1,.36,1),opacity .25s}
+.item.on::before{transform:scaleY(1);opacity:1}
+.head{position:relative;isolation:isolate;overflow:hidden;height:50px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font-weight:600;font-size:14px;cursor:pointer;user-select:none}
+.item.on /* onda que nasce no ponto do clique */
+.head::after{content:'';position:absolute;left:var(--rx,50%);top:var(--ry,50%);width:260px;height:260px;margin:-130px 0 0 -130px;border-radius:50%;z-index:-1;pointer-events:none;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 30%,transparent),transparent 65%);transform:scale(0);opacity:0}
+.head.rip::after{animation:ripple .6s cubic-bezier(.2,.7,.3,1)}
+.headlbl{display:flex;align-items:center;gap:9px;min-width:0}
+.risk{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.3px;color:var(--warn);background:color-mix(in srgb,var(--warn) 15%,transparent);border:1px solid color-mix(in srgb,var(--warn) 35%,transparent);border-radius:4px;padding:2px 6px;flex:none}
+.risk.unsafe{--warn:var(--danger)}
+
+/* ícone (i) */
+.info{flex:none;width:18px;height:18px;display:grid;place-items:center;border-radius:50%;color:var(--muted);transition:color .2s,transform .3s cubic-bezier(.34,1.56,.64,1)}
+.info svg{width:17px;height:17px}
+.info:hover,.info:focus-visible{color:var(--text);transform:scale(1.15)}
+.info.warn{color:var(--warn)}
+.info.danger{color:var(--danger)}
+
+.ctl{display:flex;align-items:center;gap:10px}
+.chev{width:28px;height:28px;margin-right:-6px;border-radius:7px;display:grid;place-items:center;color:#c7cae0;font-size:12px;transition:background .2s,color .2s}
+.chev:hover{background:rgba(255,255,255,.07);color:#fff}
+.chev i{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.item.open .chev i{transform:rotate(180deg)}
+
+.wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows .42s cubic-bezier(.22,1,.36,1)}
+.item.open .wrap{grid-template-rows:1fr}
+.inner{overflow:hidden;min-height:0;visibility:hidden;transition:visibility 0s .42s}
+.item.open .inner{visibility:visible;transition-delay:0s}
+.rows{border-top:1px solid var(--line);background:var(--panel-3);transition:opacity .3s}
+.item.off .rows{opacity:.45}
+/* linhas entram em cascata ao abrir */
+.row{display:flex;align-items:center;gap:14px;padding:13px 14px;min-height:58px;opacity:0;transform:translateY(-8px);transition:opacity .15s,transform .15s}
+.item.open .row{opacity:1;transform:none;transition:opacity .35s ease calc(var(--i,0)*50ms + 90ms),transform .5s cubic-bezier(.22,1,.36,1) calc(var(--i,0)*50ms + 90ms)}
+.row + .row{border-top:1px solid var(--line)}
+.row[data-t="toggle"]{cursor:pointer}
+.lbl{width:110px;flex:none;color:var(--muted);font-weight:500;font-size:13.5px}
+.row[data-t="toggle"] .lbl{flex:1}
+
+/* toggle */
+.sw{position:relative;width:32px;height:18px;flex:none;cursor:pointer}
+.sw::before{content:'';position:absolute;inset:3px 0;border-radius:12px;background:#33354a;transition:background .3s}
+.sw::after{content:'';position:absolute;top:0;left:0;width:18px;height:18px;border-radius:50%;background:#9799ad;box-shadow:0 1px 3px rgba(0,0,0,.4);transition:left .35s cubic-bezier(.3,1.35,.5,1),width .15s,background .25s,box-shadow .3s}
+.sw.on::before{background:color-mix(in srgb,var(--accent) 42%,#1c1d2c)}
+.sw.on::after{left:14px;background:var(--accent);box-shadow:0 0 8px color-mix(in srgb,var(--accent) 60%,transparent)}
+.sw:active::after{width:22px}
+.sw.on:active::after{left:10px}
+
+/* slider — thumb facetado (motivo "gema") */
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;min-width:0;height:16px;background:transparent;cursor:pointer;outline:none}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:linear-gradient(90deg,var(--accent) var(--p),#31324a var(--p))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-4.5px;border-radius:3px;rotate:45deg;background:var(--accent);border:2px solid #10111b;box-shadow:0 0 0 1px var(--accent);transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+input[type=range]:hover::-webkit-slider-thumb{transform:scale(1.2)}
+input[type=range]:active::-webkit-slider-thumb{transform:scale(1.35);box-shadow:0 0 0 1px var(--accent),0 0 0 6px color-mix(in srgb,var(--accent) 22%,transparent)}
+input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:#31324a}
+input[type=range]::-moz-range-progress{height:4px;border-radius:4px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:10px;height:10px;border-radius:3px;rotate:45deg;background:var(--accent);border:2px solid #10111b;box-shadow:0 0 0 1px var(--accent)}
+
+/* caixas de valor / texto / valor fixo */
+.num{width:58px;height:31px;border-radius:6px;border:1px solid transparent;background:var(--field);color:#cfd2e6;text-align:center;font:inherit;font-size:13.5px;outline:none;transition:border-color .2s}
+.num:focus{border-color:var(--accent)}
+.txt{flex:1;width:100%;min-width:0;text-align:left;padding:0 12px}
+.txt::placeholder{color:#5d607a}
+.static-val{margin-left:auto;display:inline-flex;align-items:center;gap:7px;height:31px;padding:0 12px;border-radius:6px;background:var(--field);color:var(--muted);font-size:13.5px;font-weight:600}
+.static-val i{font-size:11px;opacity:.7}
+
+/* botão */
+.btn{height:30px;padding:0 16px;border-radius:6px;border:1px solid var(--accent);color:var(--accent);font-weight:600;font-size:13px;transition:.2s}
+.btn:hover{background:var(--accent);color:#141018}
+.btn:active{transform:scale(.95)}
+
+/* ===== POPOVER (engrenagem) ===== */
+.pop{
+  position:absolute;top:60px;right:18px;width:224px;padding:16px;z-index:5;
+  background:rgba(23,24,38,.92);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(-8px);pointer-events:none;transition:.22s;
+}
+.pop.open{opacity:1;transform:none;pointer-events:auto}
+.plabel{color:var(--muted);font-size:12.5px;font-weight:500;margin-bottom:12px}
+.swatches{display:flex;gap:14px;margin-bottom:18px}
+.swatches button{width:16px;height:16px;border-radius:4px;rotate:45deg;border:2px solid rgba(255,255,255,.08);transition:.2s}
+.swatches button:hover{transform:rotate(45deg) scale(1.2)}
+.swatches button.sel{border-color:#fff;box-shadow:0 0 0 2px rgba(255,255,255,.15)}
+.prow{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:600;cursor:pointer}
+
+/* ===== BUSCA (overlay) ===== */
+.spot{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:flex-start;padding-top:84px;background:rgba(5,6,10,.55);backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .22s}
+.spot.open{opacity:1;pointer-events:auto}
+.spot-box{width:min(540px,90%);background:rgba(20,21,33,.97);border:1px solid var(--line-2);border-radius:12px;box-shadow:0 24px 70px rgba(0,0,0,.65);overflow:hidden;transform:translateY(-12px) scale(.97);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.spot.open .spot-box{transform:none}
+.spot-in{display:flex;align-items:center;gap:12px;height:56px;padding:0 18px;border-bottom:1px solid var(--line);color:var(--muted)}
+.spot-in input{flex:1;min-width:0;background:none;border:0;outline:none;color:var(--text);font:inherit;font-size:15px;caret-color:var(--accent)}
+.spot-in input::placeholder{color:#5d607a}
+.spot-list{max-height:296px;overflow-y:auto;padding:8px;scrollbar-width:thin;scrollbar-color:#282a3d transparent}
+.res{position:relative;display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--muted);white-space:nowrap;transition:background .15s}
+.res b{color:var(--text);font-weight:600}
+.res .k{color:var(--accent)}
+.res mark{background:none;color:var(--accent)}
+.res::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px;background:var(--accent);transform:scaleY(0);transition:transform .2s}
+.res.sel{background:#232536}
+.res.sel::before{transform:scaleY(1)}
+.ron{margin-left:auto;width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.spot.fresh .res{animation:resIn .3s cubic-bezier(.22,1,.36,1) both;animation-delay:calc(var(--i)*22ms)}
+.spot-none{padding:26px 10px;text-align:center;color:var(--muted);font-size:13.5px}
+.spot-foot{display:flex;align-items:center;gap:16px;padding:0 18px;height:36px;border-top:1px solid var(--line);color:#6b6e88;font-size:12px}
+.spot-foot kbd{font:inherit;background:var(--field);border-radius:4px;padding:1px 6px;color:#a4a7bf;margin-right:6px}
+.spot-foot span:last-child{margin-left:auto}
+
+/* ===== BALÃO DE INFO ===== */
+.tip{position:absolute;left:0;top:0;z-index:7;width:max-content;max-width:250px;padding:10px 12px;border-radius:9px;background:rgba(23,24,38,.97);backdrop-filter:blur(10px);border:1px solid var(--line-2);border-left:2px solid var(--tc);box-shadow:0 12px 30px rgba(0,0,0,.5);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .16s,transform .2s cubic-bezier(.22,1,.36,1)}
+.tip.show{opacity:1;transform:none}
+.tip.t-info{--tc:var(--accent)}
+.tip.t-warn{--tc:var(--warn)}
+.tip.t-danger{--tc:var(--danger)}
+.tip h4{font-family:var(--font-display);font-size:12.5px;font-weight:700;color:var(--tc)}
+.tip p{font-size:12.5px;line-height:1.5;color:#b4b7cc;margin-top:5px}
+
+/* ===== BLOQUEIO (risky), vazio e destaque ===== */
+.locked{display:none!important}
+.reveal{animation:reveal .55s cubic-bezier(.22,1,.36,1) both}
+.item.flash{animation:flash 1.3s ease}
+.empty{display:none;padding:70px 20px;text-align:center;color:var(--muted);font-size:13.5px;line-height:1.6}
+.empty i{display:block;font-size:22px;margin-bottom:12px;color:var(--accent)}
+
+/* ===== TOAST ===== */
+.toast{
+  position:absolute;bottom:18px;left:50%;z-index:6;display:flex;align-items:center;gap:8px;
+  padding:9px 16px 9px 12px;border-radius:9px;background:rgba(23,24,38,.92);backdrop-filter:blur(10px);
+  border:1px solid var(--line);border-left:2px solid var(--accent);font-size:13px;font-weight:600;white-space:nowrap;
+  opacity:0;transform:translate(-50%,14px);pointer-events:none;transition:.25s;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast i{color:var(--accent);font-size:12px}
+
+@keyframes winIn{from{opacity:0;transform:scale(.97)}}
+@keyframes pageIn{from{opacity:0;transform:translateY(8px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes subIn{from{opacity:0;transform:translateY(-5px)}}
+@keyframes ripple{from{transform:scale(0);opacity:1}to{transform:scale(1);opacity:0}}
+@keyframes reveal{from{opacity:0;transform:translateY(-8px) scale(.98)}}
+@keyframes resIn{from{opacity:0;transform:translateY(-6px)}}
+@keyframes flash{30%{box-shadow:0 0 0 2px var(--accent),0 0 26px color-mix(in srgb,var(--accent) 45%,transparent)}}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+</head>
+<body>
+
+<div class="win" id="win">
+  <header>
+    <div class="brand">
+      <svg class="gem" width="24" height="28" viewBox="0 0 26 30" aria-hidden="true">
+        <path class="gem-fill" d="M13 1 L24 10 L13 29 L2 10 Z"/>
+        <path class="gem-line" d="M2 10 L24 10 M13 1 L8.5 10 L13 29 M13 1 L17.5 10 L13 29"/>
+      </svg>
+      <div class="brandtext"><span class="wordmark" id="name"></span><span class="tag" id="badge"></span></div>
+    </div>
+    <div class="status"><span class="dot"></span><span>Updating to v.7.2</span></div><div class="status"></span><span>Not Connected*</span></div>
+    <nav class="subtabs" id="subtabs"></nav>
+    <div class="spacer"></div>
+    <div class="hright">
+      <button class="hbtn" id="gear" title="Settings"><i class="fas fa-gear"></i></button>
+      <button class="hbtn" id="sbtn" title="Search (Ctrl+K)"><i class="fas fa-magnifying-glass"></i></button>
+    </div>
+  </header>
+
+  <main>
+    <aside id="tabs"></aside>
+    <div class="content" id="content"></div>
+  </main>
+
+  <div class="pop" id="pop">
+    <div class="plabel">Accent</div>
+    <div class="swatches" id="swatches"></div>
+    <div class="prow" id="anim"><span>Animations</span><span class="sw on"></span></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="tip" id="tip"></div>
+  <div class="spot" id="spot">
+    <div class="spot-box" role="dialog" aria-label="Search modules">
+      <div class="spot-in"><i class="fas fa-magnifying-glass"></i><input id="search" placeholder="Search modules..." autocomplete="off" spellcheck="false"></div>
+      <div class="spot-list" id="results"></div>
+      <div class="spot-foot"><span><kbd>↑↓</kbd>navigate</span><span><kbd>↵</kbd>open</span><span><kbd>esc</kbd>close</span><span id="rcount"></span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   1) CONFIGURAÇÃO — edite aqui para mudar o menu
+   ---------------------------------------------------------------------
+   Item:     { label, on:true/false (mostra toggle), open:true (começa aberto),
+               risky:true, info:..., body:[controles], action:'Texto do botão',
+               onClick, onChange }
+   Controle: { type:'slider', label, min, max, value, dec }
+               -> se min === max, vira um valor fixo (sem input, só exibição)
+             { type:'input',  label, placeholder }
+             { type:'toggle', label, on }
+             { type:'button', label, text, onClick }
+   Ícones:   qualquer classe do Font Awesome (fas fa-...)
+   Sub-páginas (abas do topo): em PAGES, em vez de [colEsq, colDir], use um
+             objeto com o nome de cada sub-página. A barra do topo só aparece
+             quando a categoria tem 2 ou mais (e some se só sobrar 1):
+               visuals: {
+                 'Self':      [ [cards...], [cards...] ],
+                 'Auto Loot': [ [cards...], [cards...] ],
+               },
+             Categoria simples continua como antes: teleports: [ [..], [..] ].
+             Sub-páginas cujos módulos estão todos bloqueados (risky) ficam ocultas.
+   Clique:   clicar no cabeçalho do módulo liga/desliga. Expandir/recolher
+             é só pela setinha (chevron) da direita.
+   risky:true        o módulo fica OCULTO (menu e busca) até algum item com
+                     unlockRisky:true estar ligado (ex.: o Unsafe Mode em
+                     Configs). Ao desligar, os risky voltam a ficar desligados
+                     e ocultos. Aparece com a tag "Unsafe".
+   unlockRisky:true  vai no item que libera os risky (pode ter vários: basta
+                     um estar ligado).
+   info              ícone (i) ao lado do nome, com balão ao passar o mouse:
+                       info:'texto simples'
+                       info:{ type:'warn', title:'Atenção', text:'texto' }
+                       info:{ type:'danger', text:['linha 1','linha 2'] }
+                     type: 'info' (padrão) | 'warn' | 'danger'. title é opcional.
+   (Ban Risky): terminar o label com "(Ban Risky)" ou "(Risky)" só coloca a
+                tag laranja "Risky" ao lado do nome (visual, não oculta nada).
+   ===================================================================== */
+const APP = { name:'HORIZON', badge:'GI-6.4', tab:'visuals' };
+const ACCENTS = [
+  { c:'#d3ad6a', n:'Topaz'    },
+  { c:'#4f8fe0', n:'Sapphire' },
+  { c:'#39b37e', n:'Emerald'  },
+  { c:'#d1495b', n:'Ruby'     },
+  { c:'#9b6fd1', n:'Amethyst' },
+];
+
+const TABS = [               // [id, texto, ícone]
+  ['about','About','fa-info'],
+  ['visuals','Visuals','fa-eye'],
+  ['player','Player','fa-user'],
+  ['world','World','fa-globe'],
+  ['configs','Configs','fa-folder-open'],
+];
+
+const PAGES = {             // cada página = [coluna esquerda, coluna direita]
+  world: [
+    [
+      { title:'Dialogs', icon:'fa-comment', items:[
+        { label:'Auto-Talk', on:false, open:true,
+          info:{ type:'warn', text:'Lower Delay values increase the risk.' }, body:[
+            { type:'toggle', label:'Auto-Choices', on:false },
+            { type:'slider', label:'Delay', min:0.5, max:5, value:5 } 
+          ]},
+      ]},
+    ],
+    [
+      { title:'Auto-Collect', icon:'fa-gem', items:[
+        { label:'Auto-Loot', on:false, open:true,
+          info:{ type:'warn', text:'Lower Delay and High range values increase the risk.' }, body:[
+            { type:'toggle', label:'Open Chests', on:false },
+            { type:'slider', label:'Delay', min:1, max:5, value:5 },
+            { type:'slider', label:'Range', min:1, max:15, value:1 } 
+          ]},
+      ]},
+    ],
+    [
+//      { title:'Seelie&#39;s [Module Removed for Now]', icon:'fa-ghost', items:[
+//      { label:'Auto-Seelie', on:false, risky:true, open:false, info:'Speed-Up limit is fixed at 1.5X in this build.', body:[
+//            { type:'slider', label:'Range', min:1, max:7, value:1 },
+//            { type:'toggle', label:'Speed-Up',}
+//          ]}
+//      ]},
+    ],
+  ],
+  visuals: {
+   'Main': [
+    [
+      { title:'Visual Tweaks', icon:'fa-display', items:[
+        { label:'FPS Unlock', on:false, open:true, info:'Limit is fixed at 120 in this build.'},
+//        { label:'Menu Opacity (Not Implemented)', on:false, open:false, body:[
+//          { type:'slider', label:'Opacity', min:100, max:100, value:100, dec:0,
+//           onChange:v => $('#win').style.opacity = v/100 } ]},
+      ]},
+    ],
+    [
+      { title:'Camera', icon:'fa-camera', items:[
+        { label:'FOV Changer', on:false, open:false, body:[
+            { type:'slider', label:'FOV Value', min:45, max:120, value:45, dec:0 } ]},
+      ]},
+    ],
+    [
+    { title:'Profile Change', icon:'fa-dice', items:[
+        { label:'UID Change', open:true, on:false, body:[
+            { type:'input', label:'UID:', placeholder:'Enter UID' } ]},
+      ]},
+    ],
+   ],
+   'ESP': [
+    [
+      { title:'ESP Config', icon:'fa-eye', items:[
+        { label:'Active', on:false, open:true, body:[
+            { type:'slider', label:'Range', min:0, max:300, value:0, dec:0 },
+          ]},
+      ]},
+    ],
+    [
+      { title:'ESP Filters', icon:'fa-filter', items:[
+        { label:'ESP Chest', on:false, open:true},
+        { label:'ESP Oculi', on:false, open:true},
+      ]},
+    ],
+   ],
+  },
+player: {
+  'Movement': [
+    [{ title:'Movement', icon:'fa-person-running', items:[
+      { label:'Player-Speed', on:false, open:true, body:[
+        { type:'slider', label:'Speed', min:1, max:2.5, value:1 } ]},
+      { label:'Jump Height', on:false, open:true, body:[
+        { type:'slider', label:'Height', min:1, max:2, value:1 } ]},
+    ]}],
+    [{ title:'Advanced Movement', icon:'fa-person-running', items:[
+      { label:'No Clip (Read Info)', on:false, risky:false, info:{ type:'warn', text:'This module can be dangerous or risky if you set high values for the functions mentioned above (Speed Changer and Jump Height). Therefore, consider using low values if you decide to use this module.' } },
+    ]}],
+  ],
+  'Attack & Defense': [
+    [{ title:'Attack', icon:'fa-gun', items:[
+      { label:'Kill Aura', on:false, open:true,
+        info:{ type:'danger', title:'Risk of use', text:['High Damage and Range increase the chance of a ban.','Use low values.'] }, body:[
+        { type:'slider', label:'Damage', min:1, max:200000, value:1, dec:0 },
+        { type:'slider', label:'Range', min:1, max:15, value:1, dec:0 },
+        { type:'slider', label:'Targets', min:1, max:2, value:1, dec:0 },
+        { type:'slider', label:'Delay', min:1, max:5, value:5 } ]},
+    ]}],
+    [{ title:'Defense', icon:'fa-shield-halved', items:[
+      { label:'God Mode', on:false, },
+    ]}],
+  ],
+},
+  configs: [
+    [{ title:'Profiles', icon:'fa-folder-open', items:[
+        { label:'Save Config',  action:'Save',  msg:'Config saved',  onClick:()=>saveCfg() },
+        { label:'Load Config',  action:'Load',  msg:'Config loaded', onClick:()=>loadCfg() },
+        { label:'Reset Config', action:'Reset', msg:'Config reset',  onClick:()=>resetCfg() },
+      ]}],
+      [{ title:'Unsafe Mode', icon:'fa-skull', items:[
+      { label:'Active (Ban Risky)', on:false, unlockRisky:true },
+      ]}],
+  ],
+};
+
+/* Chamado sempre que QUALQUER valor muda — ligue seu código aqui */
+function onAnyChange(id, value){ /* console.log(id, value); */ }
+
+/* =====================================================================
+   2) MOTOR DO MENU — normalmente não precisa mexer daqui pra baixo
+   ===================================================================== */
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const dec  = c => c.dec ?? 1;
+const pct  = (c,v) => ((v-c.min)/(c.max-c.min||1)*100)+'%';
+const RISKY_RE = /\s*\(\s*(?:ban\s+)?risky\s*\)\s*$/i;
+
+const ITEMS = {}, state = {}, open = {}, MODULES = [], UNLOCKERS = [];
+const INFO_TITLES = { info:'Info', warn:'Warning', danger:'Risk of use' };
+const INFO_TYPES  = { warn:'warn', warning:'warn', danger:'danger', risk:'danger' };
+function normInfo(i){
+  if (!i) return null;
+  if (typeof i === 'string' || Array.isArray(i)) i = { text:i };
+  const type = INFO_TYPES[i.type] || 'info';
+  return { type, title:i.title ?? INFO_TITLES[type], lines:[].concat(i.text ?? []) };
+}
+let tab = APP.tab, query = '';
+
+/* PAGES[p] pode ser [colEsq,colDir] (1 página) ou { 'Nome':[colEsq,colDir], ... } (sub-páginas) */
+const SUBS = {}, subOf = {};
+for (const p in PAGES){
+  const pg = PAGES[p];
+  SUBS[p] = Array.isArray(pg) ? [{ id:'', label:'', cols:pg }] : Object.entries(pg).map(([label,cols]) => ({ id:slug(label), label, cols }));
+}
+for (const p in SUBS) SUBS[p].forEach(s => { s.items = []; s.cols.flat().forEach(card => card.items.forEach(it => {
+  const base = s.id ? `${p}.${s.id}` : p;
+  const m = RISKY_RE.exec(it.label);
+  it.ban = !!m; if (m) it.label = it.label.slice(0,m.index).trim();
+  it.id = `${base}.${slug(it.label)}`; ITEMS[it.id] = it; s.items.push(it); it.subId = s.id; it.subLabel = s.label;
+  it.info = normInfo(it.info); it.page = p; it.card = card.title; it.key = slug(it.label).replace(/-/g,'_');
+  MODULES.push(it); if (it.unlockRisky) UNLOCKERS.push(it.id);
+  if (it.on !== undefined) state[it.id] = it.on;
+  open[it.id] = !!it.open;
+  (it.body || []).forEach(c => {
+    c.id = `${it.id}.${slug(c.label)}`; ITEMS[c.id] = c;
+    if (c.type === 'slider'){ c.min ??= 0; c.max ??= 100; }
+    state[c.id] = c.type === 'toggle' ? c.on : (c.value ?? '');
+  });
+})); });
+const DEFAULTS = { ...state };
+
+/* ----- HTML ----- */
+const swHTML = (id,on) => `<span class="sw ${on?'on':''}" data-sw="${id}"></span>`;
+const INFO_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="8" cy="8" r="6.6"/><path d="M8 7.3v3.9M8 4.8v.01"/></svg>';
+const isUnsafe = () => UNLOCKERS.some(id => state[id]);
+const isLocked = it => !!it.risky && !isUnsafe();
+
+function ctlHTML(c,i){
+  const v = state[c.id], head = `<div class="row" style="--i:${i}" data-id="${c.id}" data-t="${c.type}"><span class="lbl">${c.label}</span>`;
+  if (c.type === 'slider'){
+    if (c.min === c.max) return `${head}<span class="static-val">${(+v).toFixed(dec(c))}<i class="fas fa-lock" title="Fixed value"></i></span></div>`;
+    return `${head}<input type="range" data-id="${c.id}" min="${c.min}" max="${c.max}" step="${Math.pow(10,-dec(c))}" value="${v}" style="--p:${pct(c,v)}"><input class="num" data-num="${c.id}" value="${(+v).toFixed(dec(c))}"></div>`;
+  }
+  if (c.type === 'input')  return `${head}<input class="num txt" data-txt="${c.id}" placeholder="${c.placeholder||''}" value="${v}"></div>`;
+  if (c.type === 'toggle') return `${head}${swHTML(c.id,v)}</div>`;
+  if (c.type === 'button') return `${head}<button class="btn" data-act="${c.id}">${c.text||c.label}</button></div>`;
+  return '';
+}
+
+function itemHTML(it){
+  const has = it.on !== undefined, i = it.info;
+  return `<div class="item ${open[it.id]?'open':''} ${has?(state[it.id]?'on':'off'):''} ${isLocked(it)?'locked':''}" data-item="${it.id}">
+    <div class="head"><div class="headlbl"><span class="name">${it.label}</span>
+      ${i ? `<button class="info ${i.type}" type="button" data-info="${it.id}" aria-label="${i.title}">${INFO_SVG}</button>` : ''}
+      ${it.ban ? '<span class="risk"><i class="fas fa-triangle-exclamation"></i>Risky</span>' : ''}
+      ${it.risky ? '<span class="risk unsafe"><i class="fas fa-skull"></i>Unsafe</span>' : ''}
+    </div><div class="ctl">
+      ${it.action ? `<button class="btn" data-act="${it.id}">${it.action}</button>` : ''}
+      ${has ? swHTML(it.id,state[it.id]) : ''}
+      ${it.body ? `<button class="chev" type="button" aria-label="Expand or collapse" aria-expanded="${!!open[it.id]}"><i class="fas fa-chevron-up"></i></button>` : ''}
+    </div></div>
+    ${it.body ? `<div class="wrap"><div class="inner"><div class="rows">${it.body.map(ctlHTML).join('')}</div></div></div>` : ''}
+  </div>`;
+}
+
+const cardHTML = c => `<section class="card ${c.items.every(isLocked)?'locked':''}"><h3><span class="ic"><i class="fas ${c.icon}"></i></span>${c.title}</h3><div class="items">${c.items.map(itemHTML).join('')}</div></section>`;
+
+const visSubs = p => (SUBS[p] || []).filter(s => s.items.some(it => !isLocked(it)));
+function curSub(p){
+  const all = SUBS[p] || [], vis = visSubs(p);
+  return vis.find(s => s.id === subOf[p]) || vis[0] || all[0];
+}
+function drawSubs(){
+  const nav = $('#subtabs'), vis = visSubs(tab), cur = curSub(tab), sig = vis.length > 1 ? vis.map(s => s.id).join('|') : '';
+  if (nav.dataset.sig !== sig){
+    nav.dataset.sig = sig;
+    nav.innerHTML = sig ? vis.map((s,i) => `<button class="sub" style="--i:${i}" data-sub="${s.id}">${s.label}</button>`).join('') : '';
+  }
+  $$('.sub',nav).forEach(b => b.classList.toggle('active',b.dataset.sub === cur?.id));
+}
+function setSub(id){ subOf[tab] = id; render(); }
+
+function render(){
+  const cols = curSub(tab)?.cols || [[],[]];
+  $('#content').innerHTML = `<div class="cols">${cols.map(col => `<div class="col">${col.map(cardHTML).join('')}</div>`).join('')}</div>
+    <div class="empty"><i class="fas fa-lock"></i>Nothing here yet.<br>Turn on Unsafe Mode in Configs to unlock risky modules.</div>`;
+  $('#content').scrollTop = 0;
+  syncLocks();
+}
+
+function setTab(id){
+  tab = id;
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === id));
+  render();
+}
+
+/* ----- estado ----- */
+function set(id,v,silent){
+  const o = ITEMS[id]; state[id] = v;
+  o.onChange?.(v); onAnyChange(id,v);
+  if (typeof v === 'boolean'){
+    $$(`[data-sw="${id}"]`).forEach(s => s.classList.toggle('on',v));
+    const el = $(`[data-item="${id}"]`);
+    if (el){ el.classList.toggle('on',v); el.classList.toggle('off',!v); }
+    if (o.unlockRisky) lockRisky();
+    else if (!silent) toast(`${o.label} ${v?'enabled':'disabled'}`);
+  }
+}
+const flip = id => set(id,!state[id]);
+
+/* risky: mostra/oculta módulos conforme o Unsafe Mode */
+function syncLocks(reveal){
+  const lock = (el,hide) => {
+    const was = el.classList.contains('locked');
+    el.classList.toggle('locked',hide);
+    if (reveal && was && !hide){ el.classList.remove('reveal'); void el.offsetWidth; el.classList.add('reveal'); setTimeout(() => el.classList.remove('reveal'),600); }
+  };
+  $$('.item').forEach(el => lock(el,isLocked(ITEMS[el.dataset.item])));
+  $$('.card').forEach(c => lock(c,!$$('.item:not(.locked)',c).length));
+  const e = $('.empty'); if (e) e.style.display = $('.card:not(.locked)') ? '' : 'block';
+  drawSubs();
+}
+function lockRisky(){
+  const unsafe = isUnsafe();
+  if (!unsafe) MODULES.forEach(o => { if (o.risky && state[o.id]) set(o.id,false,true); });
+  syncLocks(true);
+  toast(unsafe ? 'Unsafe Mode enabled, risky modules unlocked' : 'Unsafe Mode disabled, risky modules locked');
+}
+function enforce(){ if (!isUnsafe()) MODULES.forEach(o => { if (o.risky) state[o.id] = false; }); }
+
+function applyHooks(){ Object.values(ITEMS).forEach(o => o.onChange && o.id in state && o.onChange(state[o.id])); }
+
+/* ----- config: salvar / carregar / resetar ----- */
+const KEY = 'horizon-gi-config';
+function saveCfg(){ try{ localStorage.setItem(KEY,JSON.stringify(state)); }catch(e){} }
+function loadCfg(){ try{ Object.assign(state,JSON.parse(localStorage.getItem(KEY))||{}); }catch(e){} enforce(); render(); applyHooks(); }
+function resetCfg(){ Object.assign(state,DEFAULTS); enforce(); render(); applyHooks(); }
+
+/* ----- busca (overlay) ----- */
+const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+const pathOf = m => [tabName(m.page), SUBS[m.page].length > 1 ? m.subLabel : '', m.label].filter(Boolean).join('/');
+const tabName = id => (TABS.find(t => t[0] === id) || [])[1] || id;
+const spot = $('#spot'), sInput = $('#search'), sList = $('#results');
+let hits = [], sel = 0;
+
+function openSpot(){
+  $('#pop').classList.remove('open'); hideTip();
+  spot.classList.add('open','fresh'); sInput.value = ''; runSearch();
+  setTimeout(() => sInput.focus(),30); setTimeout(() => spot.classList.remove('fresh'),600);
+}
+function closeSpot(){ spot.classList.remove('open'); sInput.blur(); }
+
+function runSearch(){
+  const toks = norm(sInput.value.trim()).split(/\s+/).filter(Boolean);
+  hits = MODULES.map((m,n) => {
+    if (isLocked(m)) return null;
+    const label = norm(m.label), hay = `${norm(tabName(m.page))} ${norm(m.subLabel)} ${norm(m.card)} ${label} ${m.key}`;
+    if (!toks.every(t => hay.includes(t))) return null;
+    return { m, n, score:toks.reduce((a,t) => a + (label.startsWith(t) ? 3 : label.includes(t) ? 2 : 0),0) };
+  }).filter(Boolean).sort((a,b) => b.score - a.score || a.n - b.n).map(h => h.m);
+  sel = 0; drawResults(toks);
+}
+
+function hl(txt,toks){
+  const n = norm(txt); if (n.length !== txt.length || !toks.length) return txt;
+  const mk = new Array(txt.length).fill(0);
+  toks.forEach(t => { let i = n.indexOf(t); while (i > -1){ mk.fill(1,i,i + t.length); i = n.indexOf(t,i + t.length); } });
+  let out = '', on = 0;
+  for (let i = 0; i < txt.length; i++){ if (mk[i] !== on){ out += on ? '</mark>' : '<mark>'; on = mk[i]; } out += txt[i]; }
+  return out + (on ? '</mark>' : '');
+}
+
+function drawResults(toks){
+  $('#rcount').textContent = `${hits.length} module${hits.length === 1 ? '' : 's'}`;
+  sList.innerHTML = hits.length
+    ? hits.map((m,i) => `<div class="res ${i === sel ? 'sel' : ''}" style="--i:${Math.min(i,12)}" data-i="${i}"><b>${hl(pathOf(m),toks)}</b><span>-</span><span class="k">"${hl(m.key,toks)}"</span>${state[m.id] ? '<span class="ron" title="Enabled"></span>' : ''}</div>`).join('')
+    : `<div class="spot-none">No modules found for "${sInput.value.trim().replace(/</g,'&lt;')}"</div>`;
+}
+
+function moveSel(d){
+  if (!hits.length) return;
+  sel = (sel + d + hits.length) % hits.length;
+  const els = $$('.res',sList); els.forEach((el,i) => el.classList.toggle('sel',i === sel));
+  els[sel].scrollIntoView({ block:'nearest' });
+}
+
+function goTo(m){
+  closeSpot();
+  if (tab !== m.page || curSub(tab).id !== m.subId){ subOf[m.page] = m.subId; setTab(m.page); }
+  requestAnimationFrame(() => {
+    const el = $(`[data-item="${m.id}"]`); if (!el) return;
+    const c = $('#content'), r = el.getBoundingClientRect(), cr = c.getBoundingClientRect();
+    c.scrollTo({ top:c.scrollTop + r.top - cr.top - (cr.height - r.height) / 2, behavior:'smooth' });
+    el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'),1400);
+  });
+}
+
+sInput.addEventListener('input',runSearch);
+sInput.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown'){ e.preventDefault(); moveSel(1); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); moveSel(-1); }
+  else if (e.key === 'Enter' && hits[sel]) goTo(hits[sel]);
+});
+sList.addEventListener('mousemove', e => {
+  const r = e.target.closest('.res');
+  if (r && +r.dataset.i !== sel){ sel = +r.dataset.i; $$('.res',sList).forEach((x,i) => x.classList.toggle('sel',i === sel)); }
+});
+sList.addEventListener('click', e => { const r = e.target.closest('.res'); if (r) goTo(hits[+r.dataset.i]); });
+spot.addEventListener('mousedown', e => { if (e.target === spot) closeSpot(); });
+document.addEventListener('keydown', e => {
+  const open_ = spot.classList.contains('open');
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){ e.preventDefault(); open_ ? closeSpot() : openSpot(); }
+  else if (e.key === '/' && !open_ && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)){ e.preventDefault(); openSpot(); }
+  else if (e.key === 'Escape'){ if (open_) closeSpot(); else { $('#pop').classList.remove('open'); hideTip(); } }
+});
+
+/* TAB não move o foco (sem contornos esquisitos no menu) */
+document.addEventListener('keydown', e => { if (e.key === 'Tab') e.preventDefault(); });
+
+/* ----- balão de info ----- */
+const tip = $('#tip');
+function showTip(btn){
+  const i = ITEMS[btn.dataset.info].info;
+  tip.className = `tip t-${i.type}`;
+  tip.innerHTML = `<h4>${i.title}</h4>${i.lines.map(l => `<p>${l}</p>`).join('')}`;
+  tip.style.left = tip.style.top = '0px';
+  const w = $('#win').getBoundingClientRect(), b = btn.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  const x = Math.max(10,Math.min(b.left - w.left + b.width / 2 - t.width / 2,w.width - t.width - 10));
+  let y = b.top - w.top - t.height - 10; if (y < 10) y = b.bottom - w.top + 10;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+  tip.classList.add('show');
+}
+const hideTip = () => tip.classList.remove('show');
+
+/* ----- toast ----- */
+let tt;
+function toast(m){
+  const t = $('#toast'); t.innerHTML = `<i class="fas fa-circle-check"></i>${m}`; t.classList.add('show');
+  clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'),1400);
+}
+
+/* ----- eventos ----- */
+const content = $('#content');
+
+content.addEventListener('click', e => {
+  if (e.target.closest('.info')) return;
+  const b = e.target.closest('[data-act]');
+  if (b){ const o = ITEMS[b.dataset.act]; o.onClick?.(); toast(o.msg || o.label); return; }
+
+  const row = e.target.closest('.row[data-t="toggle"]');
+  if (row){ flip(row.dataset.id); return; }
+
+  const head = e.target.closest('.head'); if (!head) return;
+  const el = head.parentElement, it = ITEMS[el.dataset.item];
+  if (e.target.closest('.chev')) toggleOpen(el,it);          // só a setinha expande/recolhe
+  else if (it.on !== undefined){ ripple(head,e); flip(it.id); } // o resto do cabeçalho liga/desliga
+  else if (it.body) toggleOpen(el,it);                        // sem toggle: cabeçalho expande
+});
+
+function toggleOpen(el,it){
+  open[it.id] = !open[it.id]; el.classList.toggle('open',open[it.id]);
+  $('.chev',el)?.setAttribute('aria-expanded',open[it.id]);
+}
+function ripple(head,e){
+  const r = head.getBoundingClientRect();
+  head.style.setProperty('--rx',(e ? e.clientX - r.left : r.width / 2) + 'px');
+  head.style.setProperty('--ry',(e ? e.clientY - r.top : r.height / 2) + 'px');
+  head.classList.remove('rip'); void head.offsetWidth; head.classList.add('rip');
+}
+
+/* balão de info: hover, foco (teclado/clique) */
+content.addEventListener('mouseover', e => { const b = e.target.closest('.info'); if (b) showTip(b); });
+content.addEventListener('mouseout',  e => { if (e.target.closest('.info') && !document.activeElement.closest('.info')) hideTip(); });
+content.addEventListener('focusin',   e => { const b = e.target.closest('.info'); if (b) showTip(b); });
+content.addEventListener('focusout',  e => { if (e.target.closest('.info')) hideTip(); });
+content.addEventListener('scroll',hideTip);
+
+content.addEventListener('input', e => {
+  const t = e.target;
+  if (t.type === 'range'){
+    const c = ITEMS[t.dataset.id], v = +t.value;
+    t.style.setProperty('--p',pct(c,v));
+    $(`[data-num="${c.id}"]`).value = v.toFixed(dec(c));
+    set(c.id,v);
+  } else if (t.dataset.txt) set(t.dataset.txt,t.value);
+});
+
+content.addEventListener('change', e => {
+  const id = e.target.dataset.num; if (!id) return;
+  const c = ITEMS[id]; let v = parseFloat(e.target.value.replace(',','.'));
+  if (isNaN(v)) v = state[id];
+  const r = $(`input[type=range][data-id="${id}"]`);
+  r.value = Math.min(c.max,Math.max(c.min,v));
+  r.dispatchEvent(new Event('input',{bubbles:true}));
+});
+
+$('#tabs').innerHTML = TABS.map(([id,l,ic]) => `<button class="tab" data-tab="${id}"><i class="fas ${ic}"></i>${l}</button>`).join('');
+$('#subtabs').addEventListener('click', e => { const b = e.target.closest('.sub'); if (b) setSub(b.dataset.sub); });
+$('#tabs').addEventListener('click', e => { const t = e.target.closest('.tab'); if (t) setTab(t.dataset.tab); });
+
+$('#sbtn').onclick = openSpot;
+
+$('#gear').onclick = () => $('#pop').classList.toggle('open');
+document.addEventListener('click', e => { if (!e.target.closest('#pop,#gear')) $('#pop').classList.remove('open'); });
+
+$('#swatches').innerHTML = ACCENTS.map((a,i) => `<button style="background:${a.c}" data-c="${a.c}" title="${a.n}" class="${i?'':'sel'}"></button>`).join('');
+$('#swatches').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.documentElement.style.setProperty('--accent',b.dataset.c);
+  $$('#swatches button').forEach(x => x.classList.toggle('sel',x === b));
+});
+$('#anim').onclick = () => { const s = $('#anim .sw'); s.classList.toggle('on'); $('#win').classList.toggle('noanim',!s.classList.contains('on')); };
+
+/* ----- start -----
+   Dica de integração: troque a bolinha/texto de .status (linha do HTML,
+   id implícito no header) quando a conexão com o jogo cair, ex.:
+   document.querySelector('.status .dot').style.background = '#e2554a';
+*/
+$('#name').textContent = APP.name;
+$('#badge').textContent = APP.badge;
+setTab(APP.tab);
+applyHooks();
+</script>
+</body>
+</html>
