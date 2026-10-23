@@ -1,6 +1,0 @@
-{
-  "name": "HORIZON Tools Menu",
-  "description": "Painel de controle e menu de utilidades HORIZON Tools com visual refinado preto e branco, logotipo oficial e tipografia Inter.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
