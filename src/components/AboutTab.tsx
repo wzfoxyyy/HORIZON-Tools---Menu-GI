@@ -39,7 +39,9 @@ export const AboutTab: React.FC<AboutTabProps> = ({
             </div>
 
             <p className="text-xs sm:text-[13px] text-[#7d8299] leading-relaxed max-w-xl">
-              Painel de utilidades em tela cheia com estética Buraco Negro (Black Hole), controles modulares, tipografia Inter e zero poluição neon.
+              Hello! Thank you for choosing HORIZON Tools. Your support means a lot to us.
+              If you have any suggestions or questions, please feel free to contact us on Discord.
+              Good luck, and have a great day.
             </p>
 
             <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-2 text-xs">
@@ -48,14 +50,14 @@ export const AboutTab: React.FC<AboutTabProps> = ({
                 className="px-3.5 py-1.5 rounded-lg bg-[#d6daf0] text-[#07070a] font-bold hover:bg-[#c2c6dc] transition-colors flex items-center gap-2 text-xs cursor-pointer"
               >
                 <i className="fas fa-magnifying-glass text-[11px]" />
-                Buscar Módulos (Ctrl+K)
+                Search Module (Ctrl+K)
               </button>
               <button
                 onClick={onOpenSettings}
                 className="px-3.5 py-1.5 rounded-lg bg-[#141622] border border-white/10 text-[#d8dceb] hover:bg-white/[0.08] transition-colors flex items-center gap-2 text-xs cursor-pointer"
               >
                 <i className="fas fa-gear text-[11px]" />
-                Personalizar Tema
+                Customize Theme
               </button>
             </div>
           </div>
@@ -68,31 +70,31 @@ export const AboutTab: React.FC<AboutTabProps> = ({
         <div className="rounded-xl border border-white/[0.07] bg-[#0c0d14] p-4 space-y-3">
           <h3 className="font-bold text-xs uppercase tracking-wider text-[#9aa0b8] flex items-center gap-2">
             <i className="fas fa-keyboard text-[var(--accent)]" />
-            Atalhos do Teclado
+            Keyboard Shortcuts
           </h3>
           <ul className="space-y-2 text-xs text-[#797e96]">
             <li className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-              <span>Abrir / Ocultar Menu</span>
+              <span>Show / Hide Menu</span>
               <kbd className="px-2 py-0.5 rounded bg-[#13151f] text-[#d4d8ea] font-mono text-[11px] border border-white/10">
                 INSERT
               </kbd>
             </li>
             <li className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-              <span>Busca Rápida de Funções</span>
+              <span>Quick Function Search</span>
               <kbd className="px-2 py-0.5 rounded bg-[#13151f] text-[#d4d8ea] font-mono text-[11px] border border-white/10">
-                Ctrl + K ou /
+                Ctrl + K or /
               </kbd>
             </li>
             <li className="flex items-center justify-between py-1 border-b border-white/[0.04]">
-              <span>Fechar Janelas / Popovers</span>
+              <span>Close Windows / Popovers</span>
               <kbd className="px-2 py-0.5 rounded bg-[#13151f] text-[#d4d8ea] font-mono text-[11px] border border-white/10">
                 ESC
               </kbd>
             </li>
             <li className="flex items-center justify-between py-1">
-              <span>Navegação na Busca</span>
+              <span>Search Navigation</span>
               <kbd className="px-2 py-0.5 rounded bg-[#13151f] text-[#d4d8ea] font-mono text-[11px] border border-white/10">
-                Setas ↑ ↓ e ENTER
+                Arrows ↑ ↓ and ENTER
               </kbd>
             </li>
           </ul>
@@ -103,7 +105,7 @@ export const AboutTab: React.FC<AboutTabProps> = ({
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-xs uppercase tracking-wider text-[#9aa0b8] flex items-center gap-2">
               <i className="fas fa-shield-halved text-[var(--accent)]" />
-              Níveis de Segurança
+              Security Levels
             </h3>
             <span
               onClick={onToggleUnsafeMode}
@@ -113,7 +115,7 @@ export const AboutTab: React.FC<AboutTabProps> = ({
                   : 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30'
               }`}
             >
-              {isUnsafeMode ? 'Unsafe Mode Ativo' : 'Safe Mode Ativo'}
+              {isUnsafeMode ? 'Unsafe Mode Active' : 'Safe Mode Active'}
             </span>
           </div>
 
@@ -121,8 +123,8 @@ export const AboutTab: React.FC<AboutTabProps> = ({
             <div className="p-2 rounded-lg bg-[#111219] border border-white/[0.04] flex items-start gap-2.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1.5 shrink-0" />
               <div>
-                <strong className="text-[#d8dceb]">Padrão Seguro:</strong>
-                <p className="text-[11px] text-[#797e96]">Funções visuais (FOV, FPS, UID) e automações brandas.</p>
+                <strong className="text-[#d8dceb]">Safe by Default:</strong>
+                <p className="text-[11px] text-[#797e96]">Visual features (FOV, FPS, UID) and low-risk automations.</p>
               </div>
             </div>
 
@@ -130,7 +132,7 @@ export const AboutTab: React.FC<AboutTabProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
               <div>
                 <strong className="text-amber-300">Risky:</strong>
-                <p className="text-[11px] text-[#797e96]">Valores altos de velocidade ou kill aura podem chamar atenção.</p>
+                <p className="text-[11px] text-[#797e96]">High speed values or kill aura may attract attention.</p>
               </div>
             </div>
 
@@ -138,7 +140,7 @@ export const AboutTab: React.FC<AboutTabProps> = ({
               <span className="w-1.5 h-1.5 rounded-full bg-rose-400 mt-1.5 shrink-0" />
               <div>
                 <strong className="text-rose-300">Unsafe:</strong>
-                <p className="text-[11px] text-[#797e96]">Módulos ocultos por padrão até ativação do Unsafe Mode em Configs.</p>
+                <p className="text-[11px] text-[#797e96]">Modules are hidden by default until Unsafe Mode is enabled in Settings.</p>
               </div>
             </div>
           </div>
